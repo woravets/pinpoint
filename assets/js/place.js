@@ -1,22 +1,22 @@
-// place.js (Fixed for Android Standalone)
+// place.js (Fixed for Android Standalone + i18n)
 function openPM(e, id) {
   if (e) e.stopPropagation();
 
   types = JSON.parse(localStorage.getItem('pp_types') || '[]');
 
   if (!id && types.length === 0) {
-    alert('⚠️ ยังไม่มีประเภทสถานที่\n\nกรุณาสร้าง "ประเภทสถานที่" อย่างน้อย 1 รายการก่อนเพิ่มสถานที่');
+    alert('⚠️ ' + t('empty_types'));
     showP('types');
     return;
   }
 
   ePid = id || null;
   const titleEl = document.getElementById('ph-title');
-  if (titleEl) titleEl.textContent = id ? '✏️ แก้ไขข้อมูลสถานที่' : '📍 เพิ่มสถานที่';
+  if (titleEl) titleEl.textContent = id ? t('modal_edit_place') : t('modal_add_place');
 
   const sel = document.getElementById('ft');
   if (sel) {
-    sel.innerHTML = types.map(t => `<option value="${esc(t.id)}">${esc(t.name)}</option>`).join('');
+    sel.innerHTML = types.map(tp => `<option value="${esc(tp.id)}">${esc(tp.name)}</option>`).join('');
   }
 
   if (id) {
@@ -51,7 +51,7 @@ function openPM(e, id) {
   if (cst) cst.textContent = '';
   const gb = document.getElementById('gb');
   if (gb) {
-    gb.textContent = '📡 หาตำแหน่งปัจจุบัน';
+    gb.textContent = t('btn_gps');
     gb.disabled = false;
   }
 
@@ -81,14 +81,14 @@ async function savePh() {
   const addr = document.getElementById('fa').value.trim();
 
   if (!name || !tid || !date || !addr) {
-    alert('⚠️ กรุณากรอกข้อมูลที่มีเครื่องหมาย * ให้ครบ (ชื่อสถานที่, ประเภท, วันที่, ที่อยู่)');
+    alert('⚠️ * Required');
     return;
   }
 
   const lat = parseFloat(document.getElementById('flat').value) || null;
   const lng = parseFloat(document.getElementById('flng').value) || null;
   if ((lat && !lng) || (!lat && lng)) {
-    alert('⚠️ กรุณากรอกพิกัดละติจูดและลองจิจูดให้ครบทั้ง 2 ช่อง');
+    alert('⚠️ Lat / Lng');
     return;
   }
 
@@ -109,7 +109,7 @@ async function savePh() {
     ? await api('places', 'PUT', { ...d, surveyor: 'Admin' }, ePid)
     : await api('places', 'POST', d);
 
-  toast(ePid ? '✅ แก้ไขสถานที่เรียบร้อย' : '✅ เพิ่มสถานที่เรียบร้อย', 'ok');
+  toast('✅ ' + name, 'ok');
   await loadAll();
   closePM();
   renderAll();

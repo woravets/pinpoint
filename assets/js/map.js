@@ -6,9 +6,10 @@ function loadGoogleMaps(key,cb){
   if(typeof google!=='undefined'&&google.maps){if(cb)cb();return;}
   const old=document.getElementById('gm-script');if(old)old.remove();
   window._gmCB=cb;
+  const mapLang = (typeof curLang !== 'undefined' && curLang === 'zh') ? 'zh-CN' : (typeof curLang !== 'undefined' ? curLang : 'th');
   const s=document.createElement('script');
   s.id='gm-script';
-  s.src='https://maps.googleapis.com/maps/api/js?key='+key+'&callback=_gmReady&language=th&region=TH';
+  s.src='https://maps.googleapis.com/maps/api/js?key='+key+'&callback=_gmReady&language='+mapLang;
   s.async=true;s.defer=true;
   s.onerror=()=>{toast('❌ ไม่สามารถโหลด Google Maps — ตรวจสอบอินเทอร์เน็ตหรือ API Key','er');};
   document.head.appendChild(s);
@@ -60,7 +61,7 @@ function renderAllPins(){
         <div style="font-size:12px;color:#718096">${esc(p.addr)}</div>
         ${p.note?`<div style="font-size:11px;color:#a0aec0;margin-top:4px;font-style:italic">${esc(p.note)}</div>`:''}
         <div style="margin-top:8px;display:flex;gap:8px">
-          <a href="https://maps.google.com/?q=${p.lat},${p.lng}" target="_blank" style="font-size:12px;color:#2563eb;font-weight:600;text-decoration:none">🧭 นำทาง</a>
+          <a href="https://maps.google.com/?q=${p.lat},${p.lng}" target="_blank" style="font-size:12px;color:#2563eb;font-weight:600;text-decoration:none">${t('btn_nav')}</a>
         </div></div>`);
       gInfoWin.open(gMap,mk);
       const el=document.getElementById('pi-'+p.id);
@@ -77,7 +78,7 @@ function renderLeg(){
   const el=document.getElementById('mleg');if(!el)return;
   if(!items.length){el.style.display='none';return;}
   el.style.display='';
-  el.innerHTML='<h4>ประเภทสถานที่</h4>'+items.map(t=>`<div class="mleg-i"><div class="mleg-d" style="background:${esc(t.color)}"></div><span>${esc(t.name)}</span></div>`).join('');
+  el.innerHTML=`<h4>${t('stat_types')}</h4>`+items.map(t=>`<div class="mleg-i"><div class="mleg-d" style="background:${esc(t.color)}"></div><span>${esc(t.name)}</span></div>`).join('');
 }
 
 function focusPin(id){
@@ -90,24 +91,23 @@ function focusPin(id){
 function goMyLocation(){
   const btn=document.getElementById('myloc-btn');
   if(btn)btn.textContent='⏳';
-  if(!gMap){if(btn)btn.textContent='📍';toast('กรุณาตั้งค่า API Key ก่อน (เมนู ⚙️ ตั้งค่า)','er');return;}
-  if(!navigator.geolocation){if(btn)btn.textContent='📍';toast('อุปกรณ์นี้ไม่รองรับ GPS','er');return;}
+  if(!gMap){if(btn)btn.textContent='📍';toast('กรุณาตั้งค่า API Key ก่อน (⚙️)','er');return;}
+  if(!navigator.geolocation){if(btn)btn.textContent='📍';toast('GPS not supported','er');return;}
   navigator.geolocation.getCurrentPosition(
     pos=>{
       const la=pos.coords.latitude,ln=pos.coords.longitude;
       gMap.panTo({lat:la,lng:ln});gMap.setZoom(16);
       if(gMyLocMarker)gMyLocMarker.setMap(null);
       gMyLocMarker=new google.maps.Marker({
-        position:{lat:la,lng:ln},map:gMap,title:'ตำแหน่งของคุณ',zIndex:9999,
+        position:{lat:la,lng:ln},map:gMap,title:'My Location',zIndex:9999,
         icon:{path:google.maps.SymbolPath.CIRCLE,scale:10,fillColor:'#2563eb',fillOpacity:1,strokeColor:'white',strokeWeight:3}
       });
       if(btn)btn.textContent='📍';
-      toast('📍 พบตำแหน่งของคุณ','ok');
+      toast('📍 GPS OK','ok');
     },
     err=>{
       if(btn)btn.textContent='📍';
-      const msgs={1:'ถูกปฏิเสธสิทธิ์ — อนุญาต Location ในตั้งค่าแอป',2:'ไม่พบสัญญาณ GPS',3:'หมดเวลา — ลองใหม่'};
-      toast(msgs[err.code]||'GPS error','er');
+      toast('⚠️ GPS Error (' + err.code + ')','er');
     },
     {enableHighAccuracy:true,timeout:10000,maximumAge:0}
   );
@@ -128,7 +128,7 @@ function openMapPick(){
   document.getElementById('mpm').classList.add('on');
   updMPD();
   const k=getApiKey();
-  if(!k){toast('กรุณาตั้งค่า API Key ก่อน (เมนู ⚙️ ตั้งค่า)','er');return;}
+  if(!k){toast('กรุณาตั้งค่า API Key ก่อน (⚙️)','er');return;}
   function buildPick(){
     const el=document.getElementById('pick-gmap');if(!el)return;
     const la=pLat||13.7367,ln=pLng||100.5232;
@@ -164,20 +164,20 @@ function updatePickMarkerIcon(){if(pickMarker&&typeof google!=='undefined')pickM
 function togSat(){
   pkSat=!pkSat;
   const btn=document.getElementById('bsat');
-  if(btn){btn.classList.toggle('on',pkSat);btn.textContent=pkSat?'🗺️ แผนที่ปกติ':'🛰️ ดาวเทียม+ชื่อ';}
+  if(btn){btn.classList.toggle('on',pkSat);btn.textContent=pkSat?t('nav_map'):t('btn_sat');}
   if(pickMap)pickMap.setMapTypeId(pkSat?'hybrid':'roadmap');
 }
 function updMPD(){
   const el=document.getElementById('mpcd');if(!el)return;
-  if(pLat===null)el.textContent='คลิกหรือแตะบนแผนที่เพื่อวางหมุด';
-  else el.innerHTML='📍 ละติจูด: <b>'+pLat.toFixed(6)+'</b> &nbsp; ลองจิจูด: <b>'+pLng.toFixed(6)+'</b>';
+  if(pLat===null)el.textContent=t('pick_hint');
+  else el.innerHTML='📍 Lat: <b>'+pLat.toFixed(6)+'</b> &nbsp; Lng: <b>'+pLng.toFixed(6)+'</b>';
 }
 function confirmPick(){
-  if(pLat===null){toast('กรุณาคลิกบนแผนที่เพื่อเลือกตำแหน่ง','er');return;}
+  if(pLat===null){toast(t('pick_hint'),'er');return;}
   document.getElementById('flat').value=pLat.toFixed(6);
   document.getElementById('flng').value=pLng.toFixed(6);
-  document.getElementById('cst').textContent='📍 เลือกแล้ว: '+pLat.toFixed(5)+', '+pLng.toFixed(5);
+  document.getElementById('cst').textContent='📍 '+pLat.toFixed(5)+', '+pLng.toFixed(5);
   document.getElementById('cst').style.color='var(--green)';
-  closeMPM();updPrev();toast('📍 เลือกพิกัดเรียบร้อย','ok');
+  closeMPM();updPrev();toast('📍 OK','ok');
 }
 function closeMPM(){document.getElementById('mpm').classList.remove('on');}

@@ -1,4 +1,4 @@
-// app.js
+// app.js (High-contrast badges + i18n)
 function isMob(){return window.innerWidth<768;}
 function setSB(hide){if(!isMob())return;const sb=document.getElementById('sb');if(sb)sb.classList.toggle('hide',hide);}
 function mbToggle(showMap){
@@ -34,25 +34,49 @@ function renderAll(){
   renderTypes();
   renderAllPins();
 }
-function gtype(id){return types.find(t=>String(t.id)===String(id))||{name:id||'ไม่ระบุ',color:'#888'};}
-function fmtDateTH(d){if(!d)return'-';const[y,m,dy]=d.split('-');const mn=['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];return`${parseInt(dy)} ${mn[parseInt(m)-1]} ${parseInt(y)+543}`;}
+function gtype(id){return types.find(t=>String(t.id)===String(id))||{name:id||'-',color:'#64748b'};}
+function fmtDateTH(d){
+  if(!d)return'-';
+  const[y,m,dy]=d.split('-');
+  if (typeof curLang !== 'undefined' && curLang !== 'th') {
+    return `${y}-${m}-${dy}`;
+  }
+  const mn=['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+  return`${parseInt(dy)} ${mn[parseInt(m)-1]} ${parseInt(y)+543}`;
+}
+
+// คำนวณสีตัวอักษรให้ตัดกับสีพื้นหลังป้ายอัตโนมัติ (ขาวหรือเข้ม)
+function getContrastText(hex) {
+  if (!hex || hex.charAt(0) !== '#') return '#ffffff';
+  const c = hex.length === 4
+    ? '#' + hex[1] + hex[1] + hex[2] + hex[2] + hex[3] + hex[3]
+    : hex;
+  const r = parseInt(c.substr(1, 2), 16);
+  const g = parseInt(c.substr(3, 2), 16);
+  const b = parseInt(c.substr(5, 2), 16);
+  const yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
+  return yiq >= 155 ? '#1a2744' : '#ffffff';
+}
 
 function renderList(){
   const si=document.getElementById('si');
   const q=(si?si.value:'').toLowerCase();
   const fil=phs.filter(p=>p.name.toLowerCase().includes(q)||p.addr.toLowerCase().includes(q));
   const bcnt=document.getElementById('bcnt');
-  if(bcnt)bcnt.textContent=phs.length+' สถานที่';
+  if(bcnt)bcnt.textContent=t('place_count',{n:phs.length});
   const el=document.getElementById('pl');
   if(!el)return;
   if(!fil.length){
-    el.innerHTML=`<div class="es"><div class="ei">📍</div><p>${q?'ไม่พบสถานที่ที่ค้นหา':'ยังไม่มีข้อมูล<br>กด "+ เพิ่มสถานที่" ด้านบน'}</p></div>`;
+    el.innerHTML=`<div class="es"><div class="ei">📍</div><p>${q?t('empty_search'):t('empty_list')}</p></div>`;
     return;
   }
   el.innerHTML=fil.map(p=>{
-    const t=gtype(p.tid);const bg=t.color+'22',fg=t.color;const hc=p.lat&&p.lng;
+    const tp=gtype(p.tid);
+    const bg=tp.color || '#64748b';
+    const fg=getContrastText(bg);
+    const hc=p.lat&&p.lng;
     return`<div class="pi${+p.id===+selId?' sel':''}" id="pi-${p.id}" onclick="showDetail(${+p.id})" style="cursor:pointer">
-      <div class="pih"><div class="pin2">📍 ${esc(p.name)}</div><span class="ptb" style="background:${esc(bg)};color:${esc(fg)}">${esc(t.name)}</span></div>
+      <div class="pih"><div class="pin2">📍 ${esc(p.name)}</div><span class="ptb" style="background:${esc(bg)};color:${fg};border:1px solid rgba(0,0,0,.1)">${esc(tp.name)}</span></div>
       <div class="pm2"><span class="mr">📅 ${fmtDateTH(p.date)}</span>${hc?`<span class="mr">📍 ${(+p.lat).toFixed(4)}, ${(+p.lng).toFixed(4)}</span>`:''}</div>
       <div class="mr" style="margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">🗺️ ${esc(p.addr)}</div>
       ${p.note?`<div class="mr" style="margin-top:3px;color:var(--g300);font-style:italic;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">💬 ${esc(p.note)}</div>`:''}

@@ -1,4 +1,4 @@
-// settings.js (Offline Android Version + Emoji Picker)
+// settings.js (Offline Android Version + Emoji Picker + i18n)
 const APP_EMOJIS = [
   '📍','📌','🗺️','🧭','🏥','💊','🩺','🚑',
   '🏪','🏬','🏢','🏠','🏡','🏭','🏗️','🏛️',
@@ -40,6 +40,7 @@ function renderSettings() {
   const iIcon = document.getElementById('sapp-icon'); if (iIcon) iIcon.value = appConfig.icon;
   const iName = document.getElementById('sapp-name'); if (iName) iName.value = appConfig.name;
   const iSub  = document.getElementById('sapp-sub');  if (iSub)  iSub.value  = appConfig.sub;
+  const langSel = document.getElementById('slang');   if (langSel) langSel.value = curLang;
   renderEmojiGrid();
 }
 
@@ -47,12 +48,12 @@ function saveBranding() {
   const icon = (document.getElementById('sapp-icon').value || '').trim() || '📍';
   const name = (document.getElementById('sapp-name').value || '').trim();
   const sub  = (document.getElementById('sapp-sub').value || '').trim();
-  if (!name) { toast('กรุณาระบุชื่อแอป', 'er'); return; }
+  if (!name) { toast('⚠️ ' + t('name_lbl'), 'er'); return; }
 
   appConfig = { icon, name, sub };
   localStorage.setItem('pp_config', JSON.stringify(appConfig));
   applyBranding();
-  toast('✅ บันทึกชื่อและรายละเอียดแอปเรียบร้อย', 'ok');
+  toast('✅ ' + name, 'ok');
 }
 
 function updateBadge(status, msg) {
@@ -60,11 +61,11 @@ function updateBadge(status, msg) {
   if (!badge) return;
   if (status === 'ok') {
     badge.className = 'msbdg ok';
-    badge.textContent = '✅ พร้อมใช้งาน';
-    if (st) { st.className = 'kst ok'; st.textContent = '✅ ' + (msg || 'เชื่อมต่อ Google Maps สำเร็จ'); }
+    badge.textContent = t('key_ready');
+    if (st) { st.className = 'kst ok'; st.textContent = msg || t('key_ready'); }
   } else {
     badge.className = 'msbdg no';
-    badge.textContent = '⚠️ ยังไม่ได้ตั้งค่า';
+    badge.textContent = t('key_not_set');
     if (st) { st.className = 'kst er'; st.textContent = msg || ''; }
   }
 }
@@ -78,14 +79,14 @@ function togSAK() {
 
 function saveKey() {
   const k = (document.getElementById('sak').value || '').trim();
-  if (!k) { updateBadge('', 'กรุณาใส่ API Key'); return; }
+  if (!k) { updateBadge('', 'API Key'); return; }
   localStorage.setItem('gmApiKey', k);
-  updateBadge('', 'กำลังโหลด Google Maps...');
+  updateBadge('', 'Loading...');
   gMap = null;
   const gmEl = document.getElementById('gmap');
   if (gmEl) gmEl.innerHTML = '';
-  loadGoogleMaps(k, () => { initGMap(); updateBadge('ok', 'Google Maps พร้อมใช้งาน'); });
-  toast('✅ บันทึก API Key ลงเครื่องแล้ว', 'ok');
+  loadGoogleMaps(k, () => { initGMap(); updateBadge('ok', t('key_ready')); });
+  toast('✅ API Key Saved', 'ok');
 }
 
 function clearKey() {
@@ -96,16 +97,17 @@ function clearKey() {
   gMap = null;
   const gmEl = document.getElementById('gmap');
   if (gmEl) gmEl.innerHTML = '';
-  toast('🗑️ ลบ API Key ออกจากเครื่องเรียบร้อย', 'ok');
+  if (typeof renderNoKeyBanner === 'function') renderNoKeyBanner();
+  toast('🗑️ Key Removed', 'ok');
 }
 
 function exportData() {
-  const blob = new Blob([JSON.stringify({ places: phs, types, config: appConfig, exportDate: new Date().toISOString() }, null, 2)], { type: 'application/json' });
+  const blob = new Blob([JSON.stringify({ places: phs, types, config: appConfig, lang: curLang, exportDate: new Date().toISOString() }, null, 2)], { type: 'application/json' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
   a.download = 'pinpoint-backup-' + new Date().toISOString().slice(0, 10) + '.json';
   a.click();
-  toast('📥 Export สำเร็จ', 'ok');
+  toast('📥 Export OK', 'ok');
 }
 
 function importData(input) {
@@ -139,9 +141,9 @@ function importData(input) {
       }
       await loadAll();
       renderAll();
-      toast('📤 Import สำเร็จ ' + ok + ' สถานที่', 'ok');
+      toast('📤 Import OK (' + ok + ')', 'ok');
     } catch {
-      toast('❌ ไฟล์ไม่ถูกต้อง', 'er');
+      toast('❌ Invalid JSON', 'er');
     }
   };
   reader.readAsText(file);

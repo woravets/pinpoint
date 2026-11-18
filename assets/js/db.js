@@ -1,5 +1,5 @@
 /**
- * Local Database Engine (Standalone Android Offline-First - Final)
+ * Local Database Engine (Standalone Android Offline-First v3)
  * - ล้างข้อมูลตัวอย่างทั้งหมด 100% (สถานที่ = [], ประเภท = [])
  * - ไม่มี API Key ฝังอยู่ (gmApiKey = '')
  * - เปิดใช้งานด้วยสิทธิ์ Admin ทันที
