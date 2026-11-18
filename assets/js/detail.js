@@ -1,10 +1,8 @@
 // detail.js
-// ══ DETAIL PANEL ══
 function showDetail(id){
   const p=phs.find(x=>+x.id===+id);if(!p)return;
   const t=gtype(p.tid);
   const hc=p.lat&&p.lng;
-  const isStaff = cu && (cu.role === 'admin' || cu.role === 'manager');
 
   document.getElementById('d-name').textContent='📍 '+p.name;
   const badge=document.getElementById('d-typebadge');
@@ -31,13 +29,11 @@ function showDetail(id){
           <div class="hist-date" id="hist-date-${i}">${fmtDateTH(d)}</div>
           ${n?`<div class="hist-note" id="hist-note-${i}">💬 ${esc(n)}</div>`:`<div class="hist-note" id="hist-note-${i}" style="color:var(--g300)">ไม่มีหมายเหตุ</div>`}
           ${by?`<div class="hist-by">👤 ${esc(by)}</div>`:''}
-          ${isStaff ? `
           <div class="hist-acts">
-            <button class="hist-btn" style="background:#e8f5ff;color:var(--blue)" onclick="editHistItem(${+p.id},${i},'${esc(d)}',\`${esc(n)}\`)">✏️ แก้ไข</button>
-            <button class="hist-btn hist-btn-del" onclick="delHistItem(${+p.id},${i})">🗑️ ลบ</button>
+            <button type="button" class="hist-btn" style="background:#e8f5ff;color:var(--blue)" onclick="editHistItem(${+p.id},${i},'${esc(d)}',\`${esc(n)}\`)">✏️ แก้ไข</button>
+            <button type="button" class="hist-btn hist-btn-del" onclick="delHistItem(${+p.id},${i})">🗑️ ลบ</button>
           </div>
           <div id="hist-edit-${i}" style="display:none"></div>
-          ` : ''}
         </div>
       </div>`;
     }).join('');
@@ -49,13 +45,11 @@ function showDetail(id){
 
   let acts='';
   if(hc){
-    acts+=`<button class="d-btn d-btn-focus" onclick="closeDetail();doFocus(event,${+p.id})">📍 โฟกัส</button>`;
-    acts+=`<button class="d-btn d-btn-nav" onclick="openInMaps(${+p.id})">🧭 นำทาง</button>`;
+    acts+=`<button type="button" class="d-btn d-btn-focus" onclick="closeDetail();doFocus(event,${+p.id})">📍 โฟกัส</button>`;
+    acts+=`<button type="button" class="d-btn d-btn-nav" onclick="openInMaps(${+p.id})">🧭 นำทาง</button>`;
   }
-  if(isStaff){
-    acts+=`<button class="d-btn d-btn-edit" onclick="closeDetail();openPM(null,${+p.id})">✏️ แก้ไข</button>`;
-    acts+=`<button class="d-btn d-btn-del" onclick="closeDetail();askDel(null,'ph',${+p.id})">🗑️ ลบ</button>`;
-  }
+  acts+=`<button type="button" class="d-btn d-btn-edit" onclick="closeDetail();openPM(null,${+p.id})">✏️ แก้ไข</button>`;
+  acts+=`<button type="button" class="d-btn d-btn-del" onclick="closeDetail();askDel(null,'ph',${+p.id})">🗑️ ลบ</button>`;
   document.getElementById('d-actions').innerHTML=acts;
 
   selId=+id;renderAllPins();
@@ -63,7 +57,6 @@ function showDetail(id){
   document.getElementById('detail-panel').classList.add('on');
 }
 
-// ── HISTORY EDIT ──
 function editHistItem(pid,idx,date,note){
   const editDiv=document.getElementById('hist-edit-'+idx);
   if(!editDiv)return;
@@ -75,8 +68,8 @@ function editHistItem(pid,idx,date,note){
       <input type="text" id="he-note-${idx}" placeholder="หมายเหตุ" value="${esc(note)}">
     </div>
     <div class="hist-acts">
-      <button class="hist-btn hist-btn-save" onclick="saveHistItem(${pid},${idx})">💾 บันทึก</button>
-      <button class="hist-btn hist-btn-cancel" onclick="document.getElementById('hist-edit-${idx}').style.display='none'">ยกเลิก</button>
+      <button type="button" class="hist-btn hist-btn-save" onclick="saveHistItem(${pid},${idx})">💾 บันทึก</button>
+      <button type="button" class="hist-btn hist-btn-cancel" onclick="document.getElementById('hist-edit-${idx}').style.display='none'">ยกเลิก</button>
     </div>`;
   editDiv.style.display='';
 }
@@ -116,7 +109,7 @@ function savePlaceHistory(pid, history, cb){
   api('places','PUT',{
     name:p.name, tid:p.tid, date:p.date, addr:p.addr, ph:p.ph||'',
     lat:p.lat, lng:p.lng, note:p.note||'', ps:p.ps||'teardrop', pc:p.pc||'#e05252',
-    surveyor:cu?cu.fn+' '+cu.ln:'',
+    surveyor:'Admin',
     history:history
   },pid).then(async()=>{
     await loadAll();

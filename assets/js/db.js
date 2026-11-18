@@ -1,5 +1,5 @@
 /**
- * Local Database Engine (Standalone Android Offline-First)
+ * Local Database Engine (Standalone Android Offline-First - Final)
  * - ล้างข้อมูลตัวอย่างทั้งหมด 100% (สถานที่ = [], ประเภท = [])
  * - ไม่มี API Key ฝังอยู่ (gmApiKey = '')
  * - เปิดใช้งานด้วยสิทธิ์ Admin ทันที
@@ -11,7 +11,6 @@ let cu = { id: 1, username: 'admin', fn: 'ผู้ดูแลระบบ', ln
 let ePid = null, eUid2 = null, eTid2 = null, cfCb = null, selId = null;
 let appConfig = { icon: '📍', name: 'PinPoint', sub: 'ระบบปักหมุดส่วนบุคคล' };
 
-// ค่าเริ่มต้นว่าง 100% ไม่มีข้อมูลตัวอย่างใดๆ
 const DEFAULT_TYPES = [];
 
 function initLocalDB() {
@@ -36,7 +35,6 @@ function applyBranding() {
   setTxt('top-sub', appConfig.sub);
 }
 
-// จำลองฟังก์ชัน api() เดิมให้ทำงานกับหน่วยความจำในเครื่อง (localStorage)
 async function api(resource, method = 'GET', body = null, id = null) {
   if (resource === 'places') {
     let list = JSON.parse(localStorage.getItem('pp_places') || '[]');
@@ -104,13 +102,14 @@ async function api(resource, method = 'GET', body = null, id = null) {
     if (method === 'GET') return tList;
 
     if (method === 'POST') {
-      tList.push({ id: body.id, name: body.name, color: body.color, sort_order: tList.length + 1 });
+      const newTid = body.id || ('ty_' + Date.now());
+      tList.push({ id: newTid, name: body.name, color: body.color || '#2563eb', sort_order: tList.length + 1 });
       localStorage.setItem('pp_types', JSON.stringify(tList));
-      return { created: true };
+      return { created: true, id: newTid };
     }
 
     if (method === 'PUT' && id) {
-      const idx = tList.findIndex(x => x.id === id);
+      const idx = tList.findIndex(x => String(x.id) === String(id));
       if (idx > -1) {
         tList[idx].name = body.name;
         tList[idx].color = body.color;
@@ -120,7 +119,7 @@ async function api(resource, method = 'GET', body = null, id = null) {
     }
 
     if (method === 'DELETE' && id) {
-      tList = tList.filter(x => x.id !== id);
+      tList = tList.filter(x => String(x.id) !== String(id));
       localStorage.setItem('pp_types', JSON.stringify(tList));
       return { deleted: true };
     }
@@ -147,7 +146,6 @@ async function loadAll() {
   }));
 }
 
-// ดึง API Key จากเครื่องเท่านั้น (ไม่มีการฝัง Key มากับแอป)
 function getApiKey() {
   return localStorage.getItem('gmApiKey') || '';
 }

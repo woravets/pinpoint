@@ -1,5 +1,4 @@
 // history.js
-// ══ SURVEY HISTORY ══
 function renderSurveyHistory(history,currentDate){
   const box=document.getElementById('survey-history-box');if(!box)return;
   if(!history||!history.length){box.style.display='none';return;}
@@ -12,7 +11,7 @@ function renderSurveyHistory(history,currentDate){
         ${h.note?`<div style="font-size:12px;color:var(--g500);margin-top:2px">${esc(h.note)}</div>`:''}
         ${h.by?`<div style="font-size:11px;color:var(--g300)">${esc(h.by)}</div>`:''}
       </div>
-      <button onclick="delHistory(${i})" style="background:none;border:none;cursor:pointer;color:var(--g300);font-size:13px">✕</button>
+      <button type="button" onclick="delHistory(${i})" style="background:none;border:none;cursor:pointer;color:var(--g300);font-size:13px">✕</button>
     </div>`).join('');
 }
 function delHistory(idx){

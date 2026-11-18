@@ -1,5 +1,4 @@
-// picker.js
-// ══ PIN ══
+// picker.js (Fixed Heart Shape)
 const PS=[{id:'teardrop',lb:'💧'},{id:'circle',lb:'⬤'},{id:'star',lb:'★'},{id:'square',lb:'■'},{id:'diamond',lb:'◆'},{id:'heart',lb:'♥'},{id:'flag',lb:'🚩'},{id:'cross',lb:'✚'}];
 const PC=['#e05252','#2d9e6b','#2563eb','#f5a623','#7c3aed','#be185d','#0891b2','#1a2744','#d97706','#059669'];
 let selPS='teardrop',selPC='#e05252';
@@ -33,7 +32,6 @@ function mkIcon(color,shape,sel){
   };
 }
 
-// ── Pin preview canvas ──
 function drawPinPreview(ctx,x,y,shape,color,size){
   const c=color;
   ctx.save();
@@ -43,7 +41,21 @@ function drawPinPreview(ctx,x,y,shape,color,size){
   if(shape==='circle'){ctx.beginPath();ctx.arc(x,y-s,s,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.restore();ctx.beginPath();ctx.arc(x,y-s,s*.38,0,Math.PI*2);ctx.fillStyle='rgba(255,255,255,.85)';ctx.fill();}
   else if(shape==='star'){ctx.beginPath();for(let i=0;i<5;i++){const a1=Math.PI/2-i*Math.PI*2/5,a2=a1-Math.PI/5;i===0?ctx.moveTo(x+Math.cos(a1)*s,y-.5*s+Math.sin(a1)*s):ctx.lineTo(x+Math.cos(a1)*s,y-.5*s+Math.sin(a1)*s);ctx.lineTo(x+Math.cos(a2)*s*.4,y-.5*s+Math.sin(a2)*s*.4);}ctx.closePath();ctx.fill();ctx.stroke();ctx.restore();}
   else if(shape==='diamond'){ctx.beginPath();ctx.moveTo(x,y-s*2);ctx.lineTo(x+s,y-s);ctx.lineTo(x,y);ctx.lineTo(x-s,y-s);ctx.closePath();ctx.fill();ctx.stroke();ctx.restore();}
-  else if(shape==='heart'){const hy=y-s*.5;ctx.beginPath();ctx.moveTo(x,hy+s*.5);ctx.bezierCurveTo(x+s*1.2,hy+s*.5,x+s*1.2,hy-s*.8,x,hy-s*.3);ctx.bezierCurveTo(x-s*1.2,hy-s*.8,x-s*1.2,hy+s*.5,x,hy+s*.5);ctx.closePath();ctx.fill();ctx.stroke();ctx.restore();}
+  else if(shape==='heart'){
+    const top = y - s * 1.8;
+    const bot = y - s * 0.1;
+    const midY = top + (bot - top) * 0.35;
+    ctx.beginPath();
+    ctx.moveTo(x, midY);
+    ctx.bezierCurveTo(x, top, x - s * 1.15, top, x - s * 1.15, midY);
+    ctx.bezierCurveTo(x - s * 1.15, midY + s * 0.65, x, midY + s * 1.15, x, bot);
+    ctx.bezierCurveTo(x, midY + s * 1.15, x + s * 1.15, midY + s * 0.65, x + s * 1.15, midY);
+    ctx.bezierCurveTo(x + s * 1.15, top, x, top, x, midY);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+    ctx.restore();
+  }
   else if(shape==='cross'){ctx.beginPath();ctx.roundRect(x-s*.35,y-s*2,s*.7,s*2+s*.35,2);ctx.fill();ctx.beginPath();ctx.roundRect(x-s,y-s*1.35-s*.35,s*2,s*.7,2);ctx.fill();ctx.restore();}
   else if(shape==='flag'){ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x,y-s*2.2);ctx.strokeStyle=c;ctx.lineWidth=2.5;ctx.stroke();ctx.beginPath();ctx.moveTo(x,y-s*2.2);ctx.lineTo(x+s*1.4,y-s*1.7);ctx.lineTo(x,y-s*1.2);ctx.closePath();ctx.fill();ctx.restore();}
   else if(shape==='square'){ctx.beginPath();ctx.roundRect(x-s,y-s*2,s*2,s*2,s*.25);ctx.fill();ctx.stroke();ctx.beginPath();ctx.moveTo(x-s*.4,y);ctx.lineTo(x+s*.4,y);ctx.lineTo(x,y+s*.7);ctx.closePath();ctx.fillStyle=c;ctx.fill();ctx.restore();}
@@ -63,8 +75,9 @@ function initPicker(){
   PS.forEach(s=>{const cv=document.getElementById('ps-'+s.id);if(!cv)return;const ctx=cv.getContext('2d');drawPinPreview(ctx,16,30,s.id,selPC,9);});
   const cr=document.getElementById('pcr');if(!cr)return;
   cr.innerHTML=PC.map(c=>`<div class="pc${c===selPC?' on':''}" style="background:${c}" onclick="setPinColor('${c}')"></div>`).join('');
-  document.getElementById('pcc').value=selPC;
+  const pcc = document.getElementById('pcc');
+  if (pcc) pcc.value=selPC;
   updPrev();
 }
 function setPinShape(id){selPS=id;initPicker();updatePickMarkerIcon();}
-function setPinColor(c){selPC=c;document.getElementById('pcc').value=c;initPicker();updatePickMarkerIcon();}
+function setPinColor(c){selPC=c;const pcc=document.getElementById('pcc');if(pcc)pcc.value=c;initPicker();updatePickMarkerIcon();}

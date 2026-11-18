@@ -1,7 +1,36 @@
-// settings.js (Offline Android Version)
+// settings.js (Offline Android Version + Emoji Picker)
+const APP_EMOJIS = [
+  '📍','📌','🗺️','🧭','🏥','💊','🩺','🚑',
+  '🏪','🏬','🏢','🏠','🏡','🏭','🏗️','🏛️',
+  '🏫','🎓','📚','⛪','🕌','🛕','⛩️','🏟️',
+  '🌳','🌲','🌾','🏞️','🏖️','⛰️','🚩','🎯'
+];
+
+function renderEmojiGrid() {
+  const grid = document.getElementById('emoji-grid');
+  if (!grid) return;
+  const cur = (document.getElementById('sapp-icon')?.value || '📍').trim();
+  grid.innerHTML = APP_EMOJIS.map(em => {
+    const active = em === cur;
+    return `<button type="button" onclick="pickAppEmoji('${em}')" style="font-size:20px;padding:6px 0;border-radius:8px;border:2px solid ${active ? 'var(--green)' : 'transparent'};background:${active ? '#dcfce7' : 'var(--w)'};cursor:pointer;line-height:1.2;">${em}</button>`;
+  }).join('');
+}
+
+function pickAppEmoji(em) {
+  const inp = document.getElementById('sapp-icon');
+  if (inp) inp.value = em;
+  renderEmojiGrid();
+}
+
+function syncEmojiGrid() {
+  renderEmojiGrid();
+}
+
 function renderSettings() {
-  document.getElementById('sys-ph').textContent = phs.length;
-  document.getElementById('sys-ty').textContent = types.length;
+  const sp = document.getElementById('sys-ph');
+  const st = document.getElementById('sys-ty');
+  if (sp) sp.textContent = phs.length;
+  if (st) st.textContent = types.length;
 
   const k = getApiKey();
   const inp = document.getElementById('sak');
@@ -11,6 +40,7 @@ function renderSettings() {
   const iIcon = document.getElementById('sapp-icon'); if (iIcon) iIcon.value = appConfig.icon;
   const iName = document.getElementById('sapp-name'); if (iName) iName.value = appConfig.name;
   const iSub  = document.getElementById('sapp-sub');  if (iSub)  iSub.value  = appConfig.sub;
+  renderEmojiGrid();
 }
 
 function saveBranding() {
@@ -35,7 +65,7 @@ function updateBadge(status, msg) {
   } else {
     badge.className = 'msbdg no';
     badge.textContent = '⚠️ ยังไม่ได้ตั้งค่า';
-    if (st) { st.className = 'kst'; st.textContent = msg || ''; }
+    if (st) { st.className = 'kst er'; st.textContent = msg || ''; }
   }
 }
 
@@ -52,6 +82,8 @@ function saveKey() {
   localStorage.setItem('gmApiKey', k);
   updateBadge('', 'กำลังโหลด Google Maps...');
   gMap = null;
+  const gmEl = document.getElementById('gmap');
+  if (gmEl) gmEl.innerHTML = '';
   loadGoogleMaps(k, () => { initGMap(); updateBadge('ok', 'Google Maps พร้อมใช้งาน'); });
   toast('✅ บันทึก API Key ลงเครื่องแล้ว', 'ok');
 }
@@ -62,7 +94,8 @@ function clearKey() {
   if (inp) inp.value = '';
   updateBadge('');
   gMap = null;
-  document.getElementById('gmap').innerHTML = '';
+  const gmEl = document.getElementById('gmap');
+  if (gmEl) gmEl.innerHTML = '';
   toast('🗑️ ลบ API Key ออกจากเครื่องเรียบร้อย', 'ok');
 }
 

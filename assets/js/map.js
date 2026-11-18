@@ -1,9 +1,6 @@
 // map.js
-// ══ GOOGLE MAPS ══
 let gMap=null,gMarkers=[],gInfoWin=null,gMyLocMarker=null;
 let pickMap=null,pickMarker=null,pLat=null,pLng=null,pkSat=false;
-
-
 
 function loadGoogleMaps(key,cb){
   if(typeof google!=='undefined'&&google.maps){if(cb)cb();return;}
@@ -13,16 +10,21 @@ function loadGoogleMaps(key,cb){
   s.id='gm-script';
   s.src='https://maps.googleapis.com/maps/api/js?key='+key+'&callback=_gmReady&language=th&region=TH';
   s.async=true;s.defer=true;
-  s.onerror=()=>{toast('❌ ไม่สามารถโหลด Google Maps — ตรวจสอบ API Key','er');};
+  s.onerror=()=>{toast('❌ ไม่สามารถโหลด Google Maps — ตรวจสอบอินเทอร์เน็ตหรือ API Key','er');};
   document.head.appendChild(s);
 }
 window._gmReady=function(){
   if(window._gmCB){window._gmCB();window._gmCB=null;}
   updateBadge('ok','Google Maps พร้อมใช้งาน');
 };
+window.gm_authFailure=function(){
+  updateBadge('','API Key ไม่ถูกต้อง หรือยังไม่ได้เปิดใช้งาน Maps JavaScript API');
+  toast('❌ Google Maps API Key ไม่ถูกต้อง กรุณาตรวจสอบในหน้าตั้งค่า','er');
+};
 
 function initGMap(){
   const el=document.getElementById('gmap');if(!el||gMap)return;
+  el.innerHTML='';
   gMap=new google.maps.Map(el,{
     center:{lat:13.7367,lng:100.5232},zoom:12,
     mapTypeControl:true,
@@ -40,7 +42,7 @@ function renderAllPins(){
   if(!gMap||typeof google==='undefined')return;
   gMarkers.forEach(m=>m.setMap(null));gMarkers=[];
   phs.filter(p=>p.lat&&p.lng).forEach(p=>{
-    const t=types.find(t=>t.id===p.tid)||{color:'#888'};
+    const t=types.find(t=>String(t.id)===String(p.tid))||{color:'#888'};
     const isSel=+p.id===+selId;
     const mk=new google.maps.Marker({
       position:{lat:+p.lat,lng:+p.lng},map:gMap,title:p.name,
@@ -50,7 +52,7 @@ function renderAllPins(){
     });
     mk.addListener('click',()=>{
       selId=p.id;renderAllPins();renderList();
-      const t2=types.find(t=>t.id===p.tid)||{name:''};
+      const t2=types.find(t=>String(t.id)===String(p.tid))||{name:''};
       gInfoWin.setContent(`<div style="font-family:-apple-system,sans-serif;padding:4px;min-width:180px">
         <div style="font-weight:700;font-size:14px;color:#1a2744;margin-bottom:4px">${esc(p.name)}</div>
         <div style="font-size:12px;color:#718096;margin-bottom:2px">🏷️ ${esc(t2.name)}</div>
@@ -70,8 +72,8 @@ function renderAllPins(){
 }
 
 function renderLeg(){
-  const used=[...new Set(phs.map(p=>p.tid))];
-  const items=types.filter(t=>used.includes(t.id));
+  const used=[...new Set(phs.map(p=>String(p.tid)))];
+  const items=types.filter(t=>used.includes(String(t.id)));
   const el=document.getElementById('mleg');if(!el)return;
   if(!items.length){el.style.display='none';return;}
   el.style.display='';
@@ -89,7 +91,7 @@ function goMyLocation(){
   const btn=document.getElementById('myloc-btn');
   if(btn)btn.textContent='⏳';
   if(!gMap){if(btn)btn.textContent='📍';toast('กรุณาตั้งค่า API Key ก่อน (เมนู ⚙️ ตั้งค่า)','er');return;}
-  if(!navigator.geolocation){if(btn)btn.textContent='📍';toast('เบราว์เซอร์นี้ไม่รองรับ GPS','er');return;}
+  if(!navigator.geolocation){if(btn)btn.textContent='📍';toast('อุปกรณ์นี้ไม่รองรับ GPS','er');return;}
   navigator.geolocation.getCurrentPosition(
     pos=>{
       const la=pos.coords.latitude,ln=pos.coords.longitude;
@@ -104,7 +106,7 @@ function goMyLocation(){
     },
     err=>{
       if(btn)btn.textContent='📍';
-      const msgs={1:'ถูกปฏิเสธสิทธิ์ — อนุญาต Location ในเบราว์เซอร์',2:'ไม่พบสัญญาณ GPS',3:'หมดเวลา — ลองใหม่'};
+      const msgs={1:'ถูกปฏิเสธสิทธิ์ — อนุญาต Location ในตั้งค่าแอป',2:'ไม่พบสัญญาณ GPS',3:'หมดเวลา — ลองใหม่'};
       toast(msgs[err.code]||'GPS error','er');
     },
     {enableHighAccuracy:true,timeout:10000,maximumAge:0}
@@ -120,7 +122,6 @@ function openInMaps(id){
   window.open(isIOS?`maps://maps.apple.com/?q=${encodeURIComponent(lb||'')}&&ll=${la},${ln}&z=16`:`https://maps.google.com/maps?q=${la},${ln}&z=16`,'_blank');
 }
 
-// ══ MAP PICK ══
 function openMapPick(){
   pLat=parseFloat(document.getElementById('flat').value)||null;
   pLng=parseFloat(document.getElementById('flng').value)||null;
