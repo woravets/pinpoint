@@ -29,7 +29,20 @@ if (sddEl) {
   });
 }
 
+function renderFilterOptions(){
+  const sel=document.getElementById('ft-filter');
+  if(!sel)return;
+  const curVal=sel.value;
+  const allLabel=typeof t==='function'?t('filter_all'):'ทุกประเภท';
+  sel.innerHTML=`<option value="">${allLabel}</option>`+
+    types.map(tp=>`<option value="${esc(tp.id)}">${esc(tp.name)}</option>`).join('');
+  if(curVal&&types.some(tp=>String(tp.id)===String(curVal))){
+    sel.value=curVal;
+  }
+}
+
 function renderAll(){
+  renderFilterOptions();
   renderList();
   renderTypes();
   renderAllPins();
@@ -61,13 +74,19 @@ function getContrastText(hex) {
 function renderList(){
   const si=document.getElementById('si');
   const q=(si?si.value:'').toLowerCase();
-  const fil=phs.filter(p=>p.name.toLowerCase().includes(q)||p.addr.toLowerCase().includes(q));
+  const ftSel=document.getElementById('ft-filter');
+  const ftVal=ftSel?ftSel.value:'';
+  const fil=phs.filter(p=>{
+    const matchText=p.name.toLowerCase().includes(q)||p.addr.toLowerCase().includes(q);
+    const matchType=!ftVal||String(p.tid)===String(ftVal);
+    return matchText&&matchType;
+  });
   const bcnt=document.getElementById('bcnt');
   if(bcnt)bcnt.textContent=t('place_count',{n:phs.length});
   const el=document.getElementById('pl');
   if(!el)return;
   if(!fil.length){
-    el.innerHTML=`<div class="es"><div class="ei">📍</div><p>${q?t('empty_search'):t('empty_list')}</p></div>`;
+    el.innerHTML=`<div class="es"><div class="ei">📍</div><p>${(q||ftVal)?t('empty_search'):t('empty_list')}</p></div>`;
     return;
   }
   el.innerHTML=fil.map(p=>{

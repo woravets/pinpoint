@@ -34,6 +34,13 @@ function initGMap(){
       mapTypeIds:['roadmap','satellite','hybrid','terrain']},
     streetViewControl:true,fullscreenControl:false,zoomControl:true,
   });
+  const sv=gMap.getStreetView();
+  if(sv){
+    sv.setOptions({
+      enableCloseButton:true,
+      addressControlOptions:{position:google.maps.ControlPosition.BOTTOM_CENTER}
+    });
+  }
   gInfoWin=new google.maps.InfoWindow();
   renderAllPins();
   toast('✅ Google Maps โหลดสำเร็จ','ok');
@@ -81,10 +88,22 @@ function renderLeg(){
   el.innerHTML=`<h4>${t('stat_types')}</h4>`+items.map(t=>`<div class="mleg-i"><div class="mleg-d" style="background:${esc(t.color)}"></div><span>${esc(t.name)}</span></div>`).join('');
 }
 
+function exitStreetView(){
+  if(gMap&&gMap.getStreetView&&gMap.getStreetView().getVisible()){
+    gMap.getStreetView().setVisible(false);
+    return true;
+  }
+  return false;
+}
+
 function focusPin(id){
   const p=phs.find(x=>+x.id===+id);if(!p||!p.lat)return;
   selId=id;
-  if(gMap){gMap.panTo({lat:+p.lat,lng:+p.lng});gMap.setZoom(17);}
+  if(gMap){
+    exitStreetView();
+    gMap.panTo({lat:+p.lat,lng:+p.lng});
+    gMap.setZoom(17);
+  }
   renderAllPins();renderList();
 }
 
@@ -95,6 +114,7 @@ function goMyLocation(){
   if(!navigator.geolocation){if(btn)btn.textContent='📍';toast('GPS not supported','er');return;}
   navigator.geolocation.getCurrentPosition(
     pos=>{
+      exitStreetView();
       const la=pos.coords.latitude,ln=pos.coords.longitude;
       gMap.panTo({lat:la,lng:ln});gMap.setZoom(16);
       if(gMyLocMarker)gMyLocMarker.setMap(null);

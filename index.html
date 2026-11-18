@@ -6,10 +6,10 @@
   <meta name="theme-color" content="#1a2744">
   <title id="page-title">PinPoint</title>
   <link rel="manifest" href="manifest.json">
-  <link rel="stylesheet" href="assets/css/base.css?v=8">
-  <link rel="stylesheet" href="assets/css/layout.css?v=8">
-  <link rel="stylesheet" href="assets/css/map.css?v=8">
-  <link rel="stylesheet" href="assets/css/components.css?v=8">
+  <link rel="stylesheet" href="assets/css/base.css?v=9">
+  <link rel="stylesheet" href="assets/css/layout.css?v=9">
+  <link rel="stylesheet" href="assets/css/map.css?v=9">
+  <link rel="stylesheet" href="assets/css/components.css?v=9">
 </head>
 <body>
 
@@ -43,14 +43,17 @@
         <div id="gmap"></div>
         <div class="ma-ctrl">
           <button type="button" onclick="goMyLocation()" id="myloc-btn" title="ตำแหน่งของฉัน">📍</button>
-          <button type="button" onclick="openInMaps(null)" title="เปิดใน Google Maps">🗺️</button>
+          <button type="button" onclick="if(!exitStreetView()) openInMaps(null)" title="แผนที่ปกติ / เปิดใน Google Maps">🗺️</button>
         </div>
         <div class="mleg" id="mleg"></div>
       </div>
       <div class="sb on" id="sb">
         <div class="sd" id="sdd"></div>
         <div class="sh"><h2 data-i18n="list_title">📋 รายการสถานที่</h2><button type="button" class="ba" onclick="openPM()" data-i18n="btn_add_place">＋ เพิ่มสถานที่</button></div>
-        <div class="sr"><div class="srw"><span class="sri">🔍</span><input type="text" id="si" data-i18n="search_ph" placeholder="🔍 ค้นหาชื่อสถานที่..." oninput="renderList()"></div></div>
+        <div class="sr" style="display:flex;gap:6px;align-items:center">
+          <div class="srw" style="flex:1;min-width:0"><span class="sri">🔍</span><input type="text" id="si" data-i18n="search_ph" placeholder="ค้นหาชื่อสถานที่..." oninput="renderList()"></div>
+          <select id="ft-filter" onchange="renderList()" style="max-width:130px;padding:8px 8px;border:1.5px solid var(--g100);border-radius:8px;font-family:var(--f);font-size:13px;background:var(--g50);color:var(--navy);outline:none;cursor:pointer;"><option value="">ทุกประเภท</option></select>
+        </div>
         <div class="pl" id="pl"></div>
       </div>
     </div>
@@ -291,18 +294,18 @@
 
 <div class="toast" id="toast"></div>
 
-<script src="assets/js/i18n.js?v=8"></script>
-<script src="assets/js/db.js?v=8"></script>
-<script src="assets/js/picker.js?v=8"></script>
-<script src="assets/js/map.js?v=8"></script>
-<script src="assets/js/gps.js?v=8"></script>
-<script src="assets/js/app.js?v=8"></script>
-<script src="assets/js/types.js?v=8"></script>
-<script src="assets/js/place.js?v=8"></script>
-<script src="assets/js/history.js?v=8"></script>
-<script src="assets/js/settings.js?v=8"></script>
-<script src="assets/js/ui.js?v=8"></script>
-<script src="assets/js/detail.js?v=8"></script>
-<script src="assets/js/boot.js?v=8"></script>
+<script src="assets/js/i18n.js?v=9"></script>
+<script src="assets/js/db.js?v=9"></script>
+<script src="assets/js/picker.js?v=9"></script>
+<script src="assets/js/map.js?v=9"></script>
+<script src="assets/js/gps.js?v=9"></script>
+<script src="assets/js/app.js?v=9"></script>
+<script src="assets/js/types.js?v=9"></script>
+<script src="assets/js/place.js?v=9"></script>
+<script src="assets/js/history.js?v=9"></script>
+<script src="assets/js/settings.js?v=9"></script>
+<script src="assets/js/ui.js?v=9"></script>
+<script src="assets/js/detail.js?v=9"></script>
+<script src="assets/js/boot.js?v=9"></script>
 </body>
 </html>

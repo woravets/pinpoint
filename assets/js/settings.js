@@ -117,15 +117,46 @@ function importData(input) {
   reader.onload = async e => {
     try {
       const d = JSON.parse(e.target.result);
+
+      const existingTypes = JSON.parse(localStorage.getItem('pp_types') || '[]');
+      const typeMap = new Map();
+      existingTypes.forEach(tp => typeMap.set(String(tp.id), tp));
+
       if (Array.isArray(d.types)) {
-        localStorage.setItem('pp_types', JSON.stringify(d.types));
+        d.types.forEach((tp, idx) => {
+          if (tp && tp.id && tp.name) {
+            typeMap.set(String(tp.id), {
+              id: String(tp.id),
+              name: tp.name,
+              color: tp.color || '#2563eb',
+              sort_order: tp.sort_order || (typeMap.size + idx + 1)
+            });
+          }
+        });
       }
+
+      if (Array.isArray(d.places)) {
+        d.places.forEach(p => {
+          const tid = String(p.tid || p.type_id || '');
+          if (tid && !typeMap.has(tid)) {
+            typeMap.set(tid, {
+              id: tid,
+              name: p.type_name || tid,
+              color: p.pc || p.pin_color || '#2563eb',
+              sort_order: typeMap.size + 1
+            });
+          }
+        });
+      }
+
+      localStorage.setItem('pp_types', JSON.stringify(Array.from(typeMap.values())));
+
       let ok = 0;
       if (Array.isArray(d.places)) {
         for (const p of d.places) {
           await api('places', 'POST', {
             name: p.name,
-            tid: p.tid || p.type_id,
+            tid: String(p.tid || p.type_id || ''),
             date: p.date || p.survey_date || '',
             addr: p.addr || p.address || '',
             ph: p.ph || p.phone || '',
@@ -139,8 +170,10 @@ function importData(input) {
           ok++;
         }
       }
+
       await loadAll();
       renderAll();
+      renderSettings();
       toast('📤 Import OK (' + ok + ')', 'ok');
     } catch {
       toast('❌ Invalid JSON', 'er');
