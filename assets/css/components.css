@@ -173,3 +173,6 @@
 .hist-btn-cancel{background:var(--g50);color:var(--g700);}
 ::-webkit-scrollbar{width:4px;}
 ::-webkit-scrollbar-thumb{background:var(--g200);border-radius:4px;}
+
+/* WIDE ICON INPUT OVERRIDE */
+#sapp-icon{flex:0 0 116px !important;width:116px !important;min-width:116px !important;max-width:116px !important;height:52px !important;padding:0 8px !important;text-align:center !important;font-size:28px !important;line-height:52px !important;}

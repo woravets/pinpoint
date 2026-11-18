@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pinpoint-android-v6';
+const CACHE_NAME = 'pinpoint-android-v7';
 
 self.addEventListener('install', (e) => {
   self.skipWaiting();
