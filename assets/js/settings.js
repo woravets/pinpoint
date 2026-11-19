@@ -1,3 +1,4 @@
+const APP_VERSION = 'v1.0.7';
 // settings.js (Offline Android Version + Emoji Picker + i18n)
 const APP_EMOJIS = [
   '📍','📌','🗺️','🧭','🏥','💊','🩺','🚑',
@@ -41,6 +42,10 @@ function renderSettings() {
   const iName = document.getElementById('sapp-name'); if (iName) iName.value = appConfig.name;
   const iSub  = document.getElementById('sapp-sub');  if (iSub)  iSub.value  = appConfig.sub;
   const langSel = document.getElementById('slang');   if (langSel) langSel.value = curLang;
+  const verTitle = document.getElementById('app-ver-title');
+  const verInfo = document.getElementById('app-ver-info');
+  if (verTitle) verTitle.textContent = `${appConfig.icon} ${appConfig.name}`;
+  if (verInfo) verInfo.textContent = typeof t === 'function' ? t('version_lbl', { v: APP_VERSION }) : `เวอร์ชันระบบ: ${APP_VERSION} (Offline Standalone)`;
   renderEmojiGrid();
 }
 

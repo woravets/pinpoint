@@ -56,7 +56,7 @@ function drawPinPreview(ctx,x,y,shape,color,size){
     ctx.stroke();
     ctx.restore();
   }
-  else if(shape==='cross'){ctx.beginPath();ctx.roundRect(x-s*.35,y-s*2,s*.7,s*2+s*.35,2);ctx.fill();ctx.beginPath();ctx.roundRect(x-s,y-s*1.35-s*.35,s*2,s*.7,2);ctx.fill();ctx.restore();}
+  else if(shape==='cross'){const cy=y-s*1.0;ctx.beginPath();ctx.roundRect(x-s*.28,cy-s,s*.56,s*2,2.5);ctx.fill();ctx.stroke();ctx.beginPath();ctx.roundRect(x-s,cy-s*.28,s*2,s*.56,2.5);ctx.fill();ctx.stroke();ctx.beginPath();ctx.rect(x-s*.24,cy-s*.32,s*.48,s*.64);ctx.fill();ctx.restore();}
   else if(shape==='flag'){ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x,y-s*2.2);ctx.strokeStyle=c;ctx.lineWidth=2.5;ctx.stroke();ctx.beginPath();ctx.moveTo(x,y-s*2.2);ctx.lineTo(x+s*1.4,y-s*1.7);ctx.lineTo(x,y-s*1.2);ctx.closePath();ctx.fill();ctx.restore();}
   else if(shape==='square'){ctx.beginPath();ctx.roundRect(x-s,y-s*2,s*2,s*2,s*.25);ctx.fill();ctx.stroke();ctx.beginPath();ctx.moveTo(x-s*.4,y);ctx.lineTo(x+s*.4,y);ctx.lineTo(x,y+s*.7);ctx.closePath();ctx.fillStyle=c;ctx.fill();ctx.restore();}
   else{ctx.beginPath();ctx.arc(x,y-s,s,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.beginPath();ctx.moveTo(x-s*.55,y-s*.3);ctx.lineTo(x+s*.55,y-s*.3);ctx.lineTo(x,y+s*.7);ctx.closePath();ctx.fill();ctx.restore();ctx.beginPath();ctx.arc(x,y-s,s*.38,0,Math.PI*2);ctx.fillStyle='rgba(255,255,255,.85)';ctx.fill();}
